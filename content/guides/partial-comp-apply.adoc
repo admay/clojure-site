@@ -1,0 +1,12 @@
+= Partial, Comp, and Apply
+Michael Zavarella
+2015-12-09
+:jbake-type: guides
+:toc: macro
+:icons: font
+
+ifdef::env-github,env-browser[:outfilesuffix: .adoc]
+
+toc::[]
+
+`partial`, `comp`, and `apply`
