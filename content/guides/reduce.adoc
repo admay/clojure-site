@@ -1,0 +1,99 @@
+= Introduction to Reduce
+Michael Zavarella
+2017-09-26
+:jbake-type: guides
+:toc: macro
+:icons: font
+
+ifdef::env-github,env-browser[:outfilesuffix: .adoc]
+
+toc::[]
+
+For many people new to functional programming, `reduce` can be a bit difficult to wrangle.
+It's incredibly flexible which gives to a lot of programming power.
+However, this flexibility makes it difficult to decide when it's appropriate to use.
+In it's simplest form, `reduce` is no more difficult to use than a `for loop`.
+
+== What is Reduce?
+
+Reduce is used to process each element of a collection and build a result accordingly.
+In other words, `reduce` takes a thing and creates another thing.
+It is the swiss army knife of list transformations.
+
+[source, clojure]
+----
+(reduce + [1 2 3 4])
+;; => 10
+----
+
+This takes a bunch of things, `[1 2 3 4]`, and transforms them into another thing, `10`, based on a function, `+`.
+You can also give reduce a starting point, like so.
+
+[source, clojure]
+----
+(reduce + 0 [1 2 3 4])
+----
+
+Simple, right?
+
+== The Reduce Algorithm
+
+The `reduce` function follows this procedure:
+
+1. Apply the given function, `+`, to the first two values of the collection, `(+ 0 1)`.
+2. Apply the function to the result of the previous step, `1` and the next element of the collection, `(+ 1 2)`.
+3. Repeat this process until you run out of elements to work with.
+
+The result will look like this, `(+ (+ (+ (+ 0 1) 2) 3) 4)`.
+
+Given a function `f`, a starting point `val`, and a collection `coll`, the process looks like this.
+
+1. Take `val` and hold it in your left hand.
+2. Take the first element of `coll` and hold it in your right hand, call it `x` for now.
+3. Clap your hands together to squish `val` and `x` (apply `f` to `val` and `x`).
+4. Repeat this process for the rest of the collection where the result of `(f val x)` is the new `val` and `(rest coll)` is the new `coll`.
+
+In code, this will look something like,
+
+[source, clojure]
+----
+(reduce + 0 [1 2 3 4])
+
+;; combining fn = +
+
+;; Step 1
+;; val = 0
+;; coll = [1 2 3 4]
+;; x = (first coll) = 1
+;;
+;; result = (+ 0 1) = 1
+;; new val = result
+;; new coll = (rest coll) = [2 3 4]
+
+;; Step 2
+;; val = result from step 1 = 1
+;; coll = [2 3 4]
+;; x = (first coll) = 2
+;;
+;; result = (+ 1 2) = 3
+;; new val = result
+;; new coll = (rest coll) = [3 4]
+
+;; Step 3
+;; val = result from step 2 = 3
+;; coll = [3 4]
+;; x = (first coll) = 3
+;;
+;; result = (+ 3 3) = 6
+;; new val = result
+;; new coll = (rest coll) = [4]
+
+;; Step 4
+;; val = result from step 3 = 6
+;; coll = [4]
+;; x = (first coll) = 4
+;;
+;; result = (+ 6 4) = 10
+;; new val = result
+;; new coll = (rest coll) = []
+----
