@@ -99,4 +99,38 @@ While things like an ID you might query based off of probably won't be curried a
 
 == Comp
 
+Now we're getting into the nitty gritty of Clojure.
+`comp` is used to compose multiple functions into one.
+
+[source, clojure]
+----
+(def my-article
+  {:title
+   :content {:description "How to Survive Medical school"
+             :url "http://www.medschoolfordummys.com/articles/help"}})
+
+(def article-description (comp :content :description))
+
+(article-description my-article)
+;; => "How to Survive Medical school"
+----
+
 == Apply
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
