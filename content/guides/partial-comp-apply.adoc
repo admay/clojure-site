@@ -1,0 +1,136 @@
+= Partial, Comp, and Apply
+Michael Zavarella
+2015-12-09
+:jbake-type: guides
+:toc: macro
+:icons: font
+
+ifdef::env-github,env-browser[:outfilesuffix: .adoc]
+
+toc::[]
+
+== Currying and Partial
+
+Currying is the technique of constructing functions in such a way that allows for partial application.
+This allows you to pass a function all of the arguments it can expects in order to return a result, or pass it a subset of the arguments and get a fucntion back that's waiting for the rest.
+Clojure doesn't support automatic currying in the way that something like Haskell does.
+However, there is a function called `partial` that gives us similar behavior.
+
+[source, clojure]
+----
+(defn greet [greeting name]
+  (format greeting name))
+
+(greet "Hello %s!" "Alex")
+;; => "Hello Alex!"
+----
+
+Calling `greet` with both of it's arguments gives us an expected result.
+However, we want to be able to use `greet` as a factory for greeting functions.
+
+[source, clojure]
+----
+(def greet-hello (greet "Hello %s!"))
+;; => clojure.lang.ArityException: Wrong number of args (1) passed to: user/greet
+----
+
+This isn't good, we get an exception, we want a function!
+Our function is expecting 2 arguments, not 1.
+We could write a multi-arity function, but this isn't always an option.
+In comes `partial`.
+
+[source, clojure]
+----
+(def greet-hello (partial greet "Hello %s!"))
+;; => #'user/greet-hello
+
+(greet-hello "Alex")
+;; => "Hello Alex!"
+----
+
+That's more like it!
+Using `partial`, we can get the currying behavior that we need.
+We can use `partial` with functions of as many arguments as we like.
+Let's look at `+`.
+
+[source, clojure]
+----
+(def add-a-bunch (partial + 1 2 3 4 5))
+;; => #'user/add-a-bunch
+
+(add-a-bunch 1)
+;; => 16
+----
+
+This is going to open a lot of doors for us later on.
+For now, we'll just stick with the idea that `partial` gives us currying.
+
+=== Order Matters
+
+First and foremost, argument order matters.
+Partial will not be able to imply which arguments you want applied and which to wait for.
+Keep this in mind while you're writing your code otherwise you might run into problems later on.
+The arguments should be ordered by 'most likely to curry'.
+Things like database connections are very likely to be curried and thus should be first.
+While things like an ID you might query based off of probably won't be curried and so should be last.
+
+[source, clojure]
+----
+;; This can be curried, but you'll have to start
+;; with an ID, which isn't always useful.
+(defn fetch-record [id store table]
+  (query-fn store table id))
+
+(def query-by-id-1 (partial fetch-record 1))
+;; Not sure how useful this is.
+
+;; By putting our data source first
+;; and table second, we can curry this function to
+;; build much more useful functions.
+(defn fetch-record [store table id]
+  (query-fn store table id))
+
+(def fetch-from-store (partial fetch-record my-db))
+
+(def fetch-from-people (partial fetch-from-store :people))
+(def fetch-from-games (partial fetch-from-store :games))
+;; These can be much more useful for a larger audience.
+----
+
+== Comp
+
+Now we're getting into the nitty gritty of Clojure.
+`comp` is used to compose multiple functions into one.
+
+[source, clojure]
+----
+(def my-article
+  {:title
+   :content {:description "How to Survive Medical school"
+             :url "http://www.medschoolfordummys.com/articles/help"}})
+
+(def article-description (comp :content :description))
+
+(article-description my-article)
+;; => "How to Survive Medical school"
+----
+
+== Apply
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
